@@ -1,8 +1,13 @@
 
 import { NavLink, Link } from "react-router-dom";
 import "./Navbar.css";
+import Search from "./Search";
+import { useState } from "react";
 
 function Navbar() {
+
+  const [showSearch, setShowSearch] = useState(false);
+
   return (
     <nav className="navbar">
       <Link to="/" className="brand">
@@ -29,18 +34,23 @@ function Navbar() {
       </div>
 
       <div className="nav-actions">
+
         <button
           className="search-button"
           aria-label="Search movies"
-          onClick={() => alert("Search feature coming soon!")}
+          onClick={() => setShowSearch(true)}
         >
           🔍
         </button>
+
 
         <NavLink to="/login" className="login-button">
           Login
         </NavLink>
       </div>
+      {showSearch && (
+        <Search onClose={() => setShowSearch(false)} />
+      )}
     </nav>
   );
 }
