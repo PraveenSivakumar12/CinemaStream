@@ -172,3 +172,135 @@
     padding: 24px 20px;
   }
 }
+
+/* =========================================
+   FORM VALIDATION - ADD TO EXISTING login.css
+========================================= */
+
+/* Input and error message stay in the same row */
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 6px;
+}
+
+/* Inputs must shrink instead of pushing errors outside */
+.field-row > input,
+.field-row > .password-field {
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Password field retains its show/hide button */
+.field-row > .password-field {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Error message on the right side */
+.field-error {
+  flex: 0 1 42%;
+  min-width: 0;
+  max-width: 42%;
+  margin: 0;
+  color: #ff646e;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Red border for invalid inputs */
+.form-group input.input-invalid,
+.form-group .password-field.input-invalid {
+  border: 1px solid #ff4d5a !important;
+  background-color: rgba(255, 65, 85, 0.06);
+  box-shadow: 0 0 0 3px rgba(255, 65, 85, 0.10);
+}
+
+/* Avoid showing an extra border inside the password wrapper */
+.password-field.input-invalid .password-input {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Give every field group enough room */
+.form-group {
+  min-width: 0;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Terms checkbox and its validation */
+.terms-option {
+  margin-top: 12px;
+  margin-bottom: 18px;
+}
+
+.terms-checkbox {
+  accent-color: #e50914;
+}
+
+.terms-error {
+  max-width: 100%;
+  margin-top: 8px;
+}
+
+/* Authentication status message */
+.auth-message {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(120, 200, 160, 0.4);
+  border-radius: 8px;
+  background: rgba(50, 170, 110, 0.08);
+  color: #a7e8c3;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* Buttons should not be submitted twice */
+.auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Tablet and mobile: error moves below the input */
+@media (max-width: 600px) {
+  .field-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .field-row > input,
+  .field-row > .password-field {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .field-error {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    font-size: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+}

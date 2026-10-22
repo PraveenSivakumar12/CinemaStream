@@ -13,6 +13,8 @@ import TVShows from "./Pages/TVshows";
 import MyList from "./Pages/Favourites";
 import Login from "./Pages/login";
 
+import {createBrowserRouter,} from "react-router-dom"
+
 function AppRoutes() {
   return (
     <BrowserRouter>
