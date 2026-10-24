@@ -1,14 +1,17 @@
-
 import "./MovieCard.css";
+import { useFavourites } from "../Context/FavouriteContext";
 
 const IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 
 function MovieCard({ movie }) {
+  const { toggleFavourite, isFavourite } = useFavourites();
+
   if (!movie) {
     return null;
   }
 
   const {
+    id,
     title,
     poster_path,
     release_date,
@@ -23,6 +26,22 @@ function MovieCard({ movie }) {
   const year = release_date
     ? release_date.slice(0, 4)
     : "Year unavailable";
+
+  const favourite = isFavourite(id);
+
+  function handleFavouriteClick(event) {
+    event.stopPropagation();
+
+    toggleFavourite({
+      id,
+      title,
+      poster_path,
+      release_date,
+      vote_average,
+      overview,
+      image: poster,
+    });
+  }
 
   return (
     <div className="movie-card">
@@ -39,6 +58,22 @@ function MovieCard({ movie }) {
         </div>
       )}
 
+      <button
+        type="button"
+        className={`favourite-btn ${
+          favourite ? "is-favourite" : ""
+        }`}
+        onClick={handleFavouriteClick}
+        aria-label={
+          favourite
+            ? `Remove ${title} from favourites`
+            : `Add ${title} to favourites`
+        }
+        aria-pressed={favourite}
+      >
+        {favourite ? "❤️" : "🤍"}
+      </button>
+
       <div className="movie-overlay">
         <h3>{title}</h3>
 
@@ -54,6 +89,7 @@ function MovieCard({ movie }) {
         </p>
 
         <button
+          type="button"
           className="movie-details-btn"
           onClick={() => alert(`Selected: ${title}`)}
         >

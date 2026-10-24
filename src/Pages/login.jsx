@@ -4,7 +4,8 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Link } from "react-router-dom";
 import "./login.css";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
 const initialValues = {
   name: "",
   email: "",
@@ -76,7 +77,9 @@ function Login() {
   const [mode, setMode] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const { login, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   function changeMode(nextMode, resetForm) {
     setMode(nextMode);
     setShowPassword(false);
@@ -113,20 +116,30 @@ function Login() {
           onSubmit={async (values, { setStatus }) => {
             setStatus("");
 
-            // Frontend validation only. Connect your backend API here.
             if (mode === "register") {
               setStatus(
-                "Registration validated successfully. Connect your backend to create your account."
+                "Registration is demo-only. Please sign in with a dummy account."
               );
-            } else if (mode === "forgot") {
-              setStatus(
-                "Email validated. Connect your password recovery API to continue."
-              );
-            } else {
-              setStatus(
-                "Login form validated. Connect your authentication API to sign in."
-              );
+              return;
             }
+
+            if (mode === "forgot") {
+              setStatus(
+                "Password recovery is not connected yet. Use a dummy account to sign in."
+              );
+              return;
+            }
+
+            const result = login(values.email, values.password);
+
+            if (!result.success) {
+              setStatus(result.message);
+              return;
+            }
+
+            const destination = location.state?.from?.pathname || "/";
+
+            navigate(destination, { replace: true });
           }}
         >
           {({
@@ -261,11 +274,10 @@ function Login() {
 
                   <div className="field-row">
                     <div
-                      className={`password-field ${
-                        touched.password && errors.password
-                          ? "input-invalid"
-                          : ""
-                      }`}
+                      className={`password-field ${touched.password && errors.password
+                        ? "input-invalid"
+                        : ""
+                        }`}
                     >
                       <Field
                         id="password"
@@ -308,11 +320,10 @@ function Login() {
 
                   <div className="field-row">
                     <div
-                      className={`password-field ${
-                        touched.confirmPassword && errors.confirmPassword
-                          ? "input-invalid"
-                          : ""
-                      }`}
+                      className={`password-field ${touched.confirmPassword && errors.confirmPassword
+                        ? "input-invalid"
+                        : ""
+                        }`}
                     >
                       <Field
                         id="confirmPassword"
