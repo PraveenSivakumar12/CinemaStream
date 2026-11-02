@@ -1,11 +1,11 @@
-
 import { useState } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
-import "./login.css";
 import { useNavigate, useLocation } from "react-router-dom";
+import "./login.css";
 import { useAuth } from "../Context/AuthContext";
+import { dummyUsers } from "../Movie_data/dummyData";
+
 const initialValues = {
   name: "",
   email: "",
@@ -77,14 +77,23 @@ function Login() {
   const [mode, setMode] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { login, isLoggedIn } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
   function changeMode(nextMode, resetForm) {
     setMode(nextMode);
     setShowPassword(false);
     setShowConfirmPassword(false);
     resetForm();
+  }
+
+  function handleQuickLogin(userEmail, userPassword) {
+    const result = login(userEmail, userPassword);
+    if (result.success) {
+      const destination = location.state?.from?.pathname || "/";
+      navigate(destination, { replace: true });
+    }
   }
 
   function renderFieldError(errors, touched, fieldName) {
@@ -108,6 +117,26 @@ function Login() {
           Your next favourite movie is waiting.
         </p>
 
+        {/* Quick Demo Login Credentials Card */}
+        <div className="demo-credentials-banner">
+          <span className="demo-banner-title">⚡ Quick Interview Demo Sign-In:</span>
+          <div className="demo-buttons-group">
+            {dummyUsers.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                className="demo-login-quick-btn"
+                onClick={() => handleQuickLogin(u.email, u.password)}
+              >
+                <span>👤 {u.name}</span>
+                <span className="demo-plan-pill">
+                  {u.plan.toUpperCase()} {u.isSubscribed ? "VIP" : ""}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <Formik
           initialValues={initialValues}
           validationSchema={getValidationSchema(mode)}
@@ -118,14 +147,14 @@ function Login() {
 
             if (mode === "register") {
               setStatus(
-                "Registration is demo-only. Please sign in with a dummy account."
+                "Registration is demo-only. Please sign in with a demo account above."
               );
               return;
             }
 
             if (mode === "forgot") {
               setStatus(
-                "Password recovery is not connected yet. Use a dummy account to sign in."
+                "Password recovery demo: Please use the 1-click demo sign in above."
               );
               return;
             }
@@ -138,19 +167,15 @@ function Login() {
             }
 
             const destination = location.state?.from?.pathname || "/";
-
             navigate(destination, { replace: true });
           }}
         >
           {({
             errors,
             touched,
-            values,
             isSubmitting,
             status,
             resetForm,
-            setFieldValue,
-            setFieldTouched,
           }) => (
             <Form noValidate>
               <div className="auth-heading">
@@ -162,7 +187,7 @@ function Login() {
 
                 <p className="auth-description">
                   {mode === "login" &&
-                    "Sign in to continue watching."}
+                    "Sign in with your credentials or 1-click demo above."}
                   {mode === "register" &&
                     "Join Cinema Stream today."}
                   {mode === "forgot" &&
@@ -274,10 +299,11 @@ function Login() {
 
                   <div className="field-row">
                     <div
-                      className={`password-field ${touched.password && errors.password
-                        ? "input-invalid"
-                        : ""
-                        }`}
+                      className={`password-field ${
+                        touched.password && errors.password
+                          ? "input-invalid"
+                          : ""
+                      }`}
                     >
                       <Field
                         id="password"
@@ -320,10 +346,11 @@ function Login() {
 
                   <div className="field-row">
                     <div
-                      className={`password-field ${touched.confirmPassword && errors.confirmPassword
-                        ? "input-invalid"
-                        : ""
-                        }`}
+                      className={`password-field ${
+                        touched.confirmPassword && errors.confirmPassword
+                          ? "input-invalid"
+                          : ""
+                      }`}
                     >
                       <Field
                         id="confirmPassword"
@@ -372,9 +399,7 @@ function Login() {
                     />
 
                     <span>
-                      I agree to the{" "}
-                      <Link to="/terms">Terms of Service</Link> and{" "}
-                      <Link to="/privacy">Privacy Policy</Link>.
+                      I agree to the Terms of Service and Privacy Policy.
                     </span>
                   </label>
 

@@ -1,6 +1,8 @@
-
 import { useEffect, useState } from "react";
 import "./FeaturedCarousel.css";
+import TrailerModal from "../Components/TrailerModal";
+import { getOttLinks } from "../utils/ottPlatforms";
+import { useFavourites } from "../Context/FavouriteContext";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const IMAGE_BASE = "https://image.tmdb.org/t/p/original";
@@ -10,9 +12,9 @@ function FeaturedCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [trailerKey, setTrailerKey] = useState("");
-  const [trailerLoading, setTrailerLoading] = useState(false);
-  const [trailerError, setTrailerError] = useState("");
+  const [selectedMovieForTrailer, setSelectedMovieForTrailer] = useState(null);
+
+  const { toggleFavourite, isFavourite } = useFavourites();
 
   // Fetch movie data from TMDB
   useEffect(() => {
@@ -49,16 +51,16 @@ function FeaturedCarousel() {
 
   // Automatically move to the next movie
   useEffect(() => {
-    if (movies.length < 2 || trailerKey) return;
+    if (movies.length < 2 || selectedMovieForTrailer) return;
 
     const interval = setInterval(() => {
       setActiveIndex((previousIndex) =>
         (previousIndex + 1) % movies.length
       );
-    }, 6000);
+    }, 6500);
 
     return () => clearInterval(interval);
-  }, [movies.length, trailerKey, activeIndex]);
+  }, [movies.length, selectedMovieForTrailer]);
 
   function showPrevious() {
     setActiveIndex((index) =>
@@ -72,47 +74,13 @@ function FeaturedCarousel() {
     );
   }
 
-  async function playTrailer(movie) {
-    setTrailerError("");
-    setTrailerKey("");
-    setTrailerLoading(true);
-
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${API_KEY}&language=en-US`
-      );
-
-      if (!response.ok) {
-        throw new Error("Unable to fetch the trailer.");
-      }
-
-      const data = await response.json();
-
-      const trailer = data.results.find(
-        (video) =>
-          video.site === "YouTube" &&
-          video.type === "Trailer" &&
-          video.official
-      ) || data.results.find(
-        (video) =>
-          video.site === "YouTube" &&
-          video.type === "Trailer"
-      );
-
-      if (trailer) {
-        setTrailerKey(trailer.key);
-      } else {
-        setTrailerError("No trailer is available for this movie.");
-      }
-    } catch {
-      setTrailerError("Could not load the trailer. Please try again.");
-    } finally {
-      setTrailerLoading(false);
-    }
-  }
-
   if (loading) {
-    return <div className="featured-message">Loading featured movies...</div>;
+    return (
+      <div className="featured-message">
+        <div className="featured-spinner" />
+        <p>Loading featured movies...</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -124,6 +92,24 @@ function FeaturedCarousel() {
   }
 
   const movie = movies[activeIndex];
+  const ottLinks = getOttLinks(movie.title);
+  const favourite = isFavourite(movie.id);
+
+  function handleToggleFav() {
+    toggleFavourite({
+      id: movie.id,
+      title: movie.title,
+      poster_path: movie.poster_path,
+      backdrop_path: movie.backdrop_path,
+      release_date: movie.release_date,
+      vote_average: movie.vote_average,
+      overview: movie.overview,
+      media_type: "movie",
+      image: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null,
+    });
+  }
 
   return (
     <section className="featured-carousel">
@@ -136,7 +122,7 @@ function FeaturedCarousel() {
       >
         <div className="featured-gradient">
           <div className="featured-content">
-            <p className="featured-label">CINEMASTREAM ORIGINALS</p>
+            <p className="featured-label">✦ CINEMASTREAM FEATURED</p>
 
             <h1>{movie.title}</h1>
 
@@ -147,26 +133,54 @@ function FeaturedCarousel() {
                   : "Release date unavailable"}
               </span>
 
-              <span>⭐ {movie.vote_average.toFixed(1)}</span>
+              <span>⭐ {movie.vote_average?.toFixed(1)} TMDB</span>
             </div>
 
             <p className="featured-overview">
               {movie.overview || "Discover this movie on Cinema-Stream."}
             </p>
 
-            <button
-              className="featured-play-button"
-              onClick={() => playTrailer(movie)}
-              disabled={trailerLoading}
-            >
-              {trailerLoading ? "Loading trailer..." : "▶ Play Trailer"}
-            </button>
+            <div className="featured-action-buttons">
+              <button
+                type="button"
+                className="featured-play-button"
+                onClick={() => setSelectedMovieForTrailer(movie)}
+              >
+                ▶ Watch Trailer
+              </button>
 
-            {trailerError && (
-              <p className="trailer-error" role="status">
-                {trailerError}
-              </p>
-            )}
+              <button
+                type="button"
+                className={`featured-fav-button ${favourite ? "active" : ""}`}
+                onClick={handleToggleFav}
+              >
+                {favourite ? "❤️ In My List" : "🤍 Add to List"}
+              </button>
+            </div>
+
+            <div className="featured-ott-row">
+              <span className="featured-ott-tag">Available on:</span>
+              <div className="featured-ott-badges">
+                {ottLinks.slice(0, 4).map((plat) => (
+                  <a
+                    key={plat.id}
+                    href={plat.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="featured-ott-pill"
+                    style={{
+                      backgroundColor: plat.badgeColor,
+                      color: plat.textColor,
+                      border: plat.border || "none",
+                    }}
+                    title={`Watch on ${plat.name}`}
+                  >
+                    <span>{plat.icon}</span>
+                    <span>{plat.name}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
 
           <button
@@ -199,28 +213,12 @@ function FeaturedCarousel() {
         </div>
       </div>
 
-      {trailerKey && (
-        <div
-          className="trailer-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${movie.title} trailer`}
-        >
-          <button
-            className="trailer-close"
-            onClick={() => setTrailerKey("")}
-            aria-label="Close trailer"
-          >
-            ✕
-          </button>
-
-          <iframe
-            src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1`}
-            title={`${movie.title} trailer`}
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+      {selectedMovieForTrailer && (
+        <TrailerModal
+          item={selectedMovieForTrailer}
+          mediaType="movie"
+          onClose={() => setSelectedMovieForTrailer(null)}
+        />
       )}
     </section>
   );

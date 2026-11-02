@@ -33,7 +33,13 @@ export function AuthProvider({ children }) {
     }
 
     // Don't store the password in the session.
-    const { password: ignoredPassword, ...safeUser } = user;
+    const safeUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      plan: user.plan,
+      isSubscribed: user.isSubscribed,
+    };
 
     localStorage.setItem("cinema-user", JSON.stringify(safeUser));
     setCurrentUser(safeUser);
@@ -42,6 +48,17 @@ export function AuthProvider({ children }) {
       success: true,
       user: safeUser,
     };
+  }
+
+  function upgradeSubscription(planName = "premium") {
+    if (!currentUser) return;
+    const updated = {
+      ...currentUser,
+      plan: planName,
+      isSubscribed: true,
+    };
+    localStorage.setItem("cinema-user", JSON.stringify(updated));
+    setCurrentUser(updated);
   }
 
   function logout() {
@@ -56,6 +73,7 @@ export function AuthProvider({ children }) {
         isLoggedIn: Boolean(currentUser),
         login,
         logout,
+        upgradeSubscription,
       }}
     >
       {children}

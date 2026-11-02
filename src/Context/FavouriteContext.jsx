@@ -3,12 +3,12 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
 } from "react";
+import Toast from "../Components/Toast";
 
-// 1. Create the context
 const FavouriteContext = createContext(null);
 
-// 2. Create the provider
 export function FavouriteProvider({ children }) {
   const [favourites, setFavourites] = useState(() => {
     try {
@@ -19,7 +19,21 @@ export function FavouriteProvider({ children }) {
     }
   });
 
-  // 3. Save favourites to localStorage
+  const [toasts, setToasts] = useState([]);
+  const [justAddedId, setJustAddedId] = useState(null);
+
+  const addToast = useCallback((message, type = "success", icon = "❤️") => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type, icon }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3200);
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(
       "cinema-favourites",
@@ -27,25 +41,30 @@ export function FavouriteProvider({ children }) {
     );
   }, [favourites]);
 
-  // 4. Add or remove a favourite
-  function toggleFavourite(movie) {
+  const toggleFavourite = useCallback((movie) => {
+    if (!movie) return;
+    const movieTitle = movie.title || movie.name || "Movie";
+
     setFavourites((current) => {
       const exists = current.some((item) => item.id === movie.id);
 
       if (exists) {
+        addToast(`Removed "${movieTitle}" from My List`, "remove", "💔");
         return current.filter((item) => item.id !== movie.id);
       }
 
+      setJustAddedId(movie.id);
+      setTimeout(() => setJustAddedId(null), 1200);
+
+      addToast(`Added "${movieTitle}" to My List!`, "success", "❤️");
       return [...current, movie];
     });
-  }
+  }, [addToast]);
 
-  // 5. Check whether a movie is favourited
-  function isFavourite(movieId) {
+  const isFavourite = useCallback((movieId) => {
     return favourites.some((movie) => movie.id === movieId);
-  }
+  }, [favourites]);
 
-  // 6. Share the state and count with components
   return (
     <FavouriteContext.Provider
       value={{
@@ -53,14 +72,16 @@ export function FavouriteProvider({ children }) {
         favouriteCount: favourites.length,
         toggleFavourite,
         isFavourite,
+        justAddedId,
+        addToast,
       }}
     >
       {children}
+      <Toast toasts={toasts} removeToast={removeToast} />
     </FavouriteContext.Provider>
   );
 }
 
-// 7. Custom hook
 export function useFavourites() {
   const context = useContext(FavouriteContext);
 

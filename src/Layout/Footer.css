@@ -1,50 +1,107 @@
-
 .footer-container {
-  background: #101014;
-  border-top: 1px solid #29292f;
-  padding: 30px 6%;
-  color: #b9b9c2;
+  background: #0d0d12;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 50px 6% 30px;
+  color: #9d9da8;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  margin-top: auto;
+}
+
+.footer-top-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+}
+
+.footer-brand {
+  max-width: 440px;
+}
+
+.footer-logo {
+  text-decoration: none;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.footer-logo span {
+  color: #ff3d4d;
+}
+
+.footer-brand p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.footer-ott-notice {
+  font-size: 12px;
+  color: #777;
+}
+
+.footer-links-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links-col h4 {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-links-col a {
+  color: #9d9da8;
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: color 0.2s ease;
+}
+
+.footer-links-col a:hover {
+  color: #ff3d4d;
+}
+
+.footer-plat-item {
+  font-size: 13px;
+  color: #888;
+}
+
+.footer-bottom-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 24px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
-.footer-brand h3 {
-  margin: 0 0 8px;
-  color: white;
-}
-
-.footer-brand h3 span {
-  color: #ff3d4d;
-}
-
-.footer-brand p,
 .footer-copy {
-  font-size: 13px;
+  font-size: 12.5px;
   margin: 0;
+  color: #777;
 }
 
-.footer-links {
+.footer-legal-links {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: #777;
 }
 
-.footer-links a {
-  color: #b9b9c2;
-  text-decoration: none;
-  font-size: 13px;
-}
-
-.footer-links a:hover {
-  color: #ff3d4d;
-}
-
-@media (max-width: 600px) {
-  .footer-container {
-    flex-direction: column;
-    align-items: flex-start;
+@media (max-width: 768px) {
+  .footer-top-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
   }
 }
